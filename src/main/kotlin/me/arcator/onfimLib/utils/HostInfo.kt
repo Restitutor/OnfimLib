@@ -36,4 +36,4 @@ internal val s_id: Int =
         }
     }
 
-internal const val SELF_PORT = 2504
+internal const val SELF_PORT = 2503

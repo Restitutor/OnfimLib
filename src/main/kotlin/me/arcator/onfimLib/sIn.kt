@@ -2,6 +2,7 @@ package me.arcator.onfimLib
 
 import com.sun.nio.sctp.AbstractNotificationHandler
 import com.sun.nio.sctp.SctpMultiChannel
+import java.net.BindException
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 import java.nio.channels.ClosedChannelException
@@ -17,7 +18,16 @@ class sIn(private val chatSender: ChatSenderInterface) : Runnable {
     private val ds = SctpMultiChannel.open()
 
     override fun run() {
-        ds.bind(InetSocketAddress(SELF_PORT))
+        while (active) {
+            try {
+                ds.bind(InetSocketAddress(SELF_PORT))
+            } catch (e: BindException) {
+                Thread.sleep(30000)
+                continue
+            }
+            break
+        }
+
         var closedCount = 0
         while (active && closedCount < 10) {
             try {

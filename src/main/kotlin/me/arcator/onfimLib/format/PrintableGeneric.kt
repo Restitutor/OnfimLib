@@ -2,14 +2,17 @@ package me.arcator.onfimLib.format
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import me.arcator.onfimLib.utils.hostname
+import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 sealed interface PrintableGeneric {
-    val colour: NamedTextColor
-    val printString: String
+    // Use methods to avoid serializing json
+    fun colour(): NamedTextColor
+    fun printString(): String
+    fun getComponent() = Component.text(printString(), colour())
 }
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 class JoinQuit(
     // Pass to Generic
     name: String,
@@ -29,17 +32,19 @@ class JoinQuit(
         name, server, platform, fromMC, fromBot, roomID,
         isArcator, type, nodeType, nodeHost, nodeName, evtId,
     ), PrintableGeneric {
-    override val colour: NamedTextColor =
+
+    override fun colour(): NamedTextColor =
         if (type == "Join") NamedTextColor.GREEN else NamedTextColor.RED
-    private val vc = if (fromMC) "" else " [VC]"
-    private val verb = if (type == "Join") " joined " else " left "
-    override val printString = name + vc + verb + server
+
+    override fun printString(): String {
+        val vc = if (fromMC == true) "" else " [VC]"
+        val verb = if (type == "Join") " joined " else " left "
+        return name + vc + verb + server
+    }
 }
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 class Switch(
     // Unique
-    @Suppress("unused")
     val fromServer: String,
 
     // Pass to Generic
@@ -59,7 +64,10 @@ class Switch(
         name, server, platform, fromMC, fromBot, roomID,
         isArcator, "Switch", nodeType, nodeHost, nodeName, evtId,
     ), PrintableGeneric {
-    override val colour: NamedTextColor = NamedTextColor.YELLOW
-    private val vc = if (fromMC) "" else " [VC]"
-    override val printString = "$name$vc moved from $fromServer to $server"
+
+    override fun colour(): NamedTextColor = NamedTextColor.YELLOW
+    override fun printString(): String {
+        val vc = if (fromMC == true) "" else " [VC]"
+        return "$name$vc moved from $fromServer to $server"
+    }
 }
