@@ -10,24 +10,25 @@ import me.arcator.onfimLib.format.ImageEvt
 import me.arcator.onfimLib.format.JoinQuit
 import me.arcator.onfimLib.format.Switch
 import me.arcator.onfimLib.interfaces.ChatSenderInterface
-import me.arcator.onfimLib.out.getHeartbeat
 import org.msgpack.jackson.dataformat.MessagePackFactory
 
-object Unpacker {
+class Unpacker(private val chatSender: ChatSenderInterface) {
     private val objectMapper = ObjectMapper(MessagePackFactory()).registerKotlinModule()
-    private val seenUuids = LinkedList<Int>()
+    private val seenUuids = ArrayDeque<Int>()
+    private var onHeartbeat: ((Heartbeat) -> Unit)? = null
 
-    // This method is designed for one thread
-    fun read(protocol: String, chatSender: ChatSenderInterface, serialized: ByteArray) {
+    @Suppress("unused")
+    fun setOnHeartbeat(listener: ((Heartbeat) -> Unit)) {
+        onHeartbeat = listener
+    }
+
+    @Suppress("unused")
+    fun read(protocol: String, serialized: ByteArray) {
         val meta = objectMapper.readValue(serialized, Generic::class.java)
         val evtType = meta.type
 
-        if (evtType != "Heartbeat") {
-            // println("[Onfim Z] Received ${meta.type} at " + System.currentTimeMillis() + " from $protocol ${meta.nodeName}")
-        }
-
         synchronized(this) {
-            if (seenUuids.contains(meta.evtId)) return
+            if (meta.evtId in seenUuids) return
             if (evtType == "Chat") {
                 val evt: Chat = objectMapper.readValue(serialized, Chat::class.java)
                 if (evt.shouldShow()) chatSender.say(evt)
@@ -38,14 +39,12 @@ object Unpacker {
                 val evt: Switch = objectMapper.readValue(serialized, Switch::class.java)
                 chatSender.say(evt)
             } else if (evtType == "Heartbeat") {
-                getHeartbeat(
-                    objectMapper.readValue(serialized, Heartbeat::class.java),
-                )
+                onHeartbeat?.invoke(objectMapper.readValue(serialized, Heartbeat::class.java))
             } else if (evtType == "Image") {
                 chatSender.say(objectMapper.readValue(serialized, ImageEvt::class.java))
             }
 
-            seenUuids.add(meta.evtId)
+            seenUuids.addLast(meta.evtId)
             while (seenUuids.size > 50) seenUuids.removeFirst()
         }
     }

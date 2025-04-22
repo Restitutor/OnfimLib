@@ -9,7 +9,9 @@ import net.kyori.adventure.text.format.NamedTextColor
 sealed interface PrintableGeneric {
     // Use methods to avoid serializing json
     fun colour(): NamedTextColor
+
     fun printString(): String
+
     fun getComponent() = Component.text(printString(), colour())
 }
 
@@ -29,9 +31,20 @@ class JoinQuit(
     evtId: Int = randomEvtId(),
 ) :
     GenericChat(
-        name, server, platform, fromMC, fromBot, roomID,
-        isArcator, type, nodeType, nodeHost, nodeName, evtId,
-    ), PrintableGeneric {
+        name,
+        server,
+        platform,
+        fromMC,
+        fromBot,
+        roomID,
+        isArcator,
+        type,
+        nodeType,
+        nodeHost,
+        nodeName,
+        evtId,
+    ),
+    PrintableGeneric {
 
     override fun colour(): NamedTextColor =
         if (type == "Join") NamedTextColor.GREEN else NamedTextColor.RED
@@ -61,11 +74,23 @@ class Switch(
     evtId: Int = randomEvtId(),
 ) :
     GenericChat(
-        name, server, platform, fromMC, fromBot, roomID,
-        isArcator, "Switch", nodeType, nodeHost, nodeName, evtId,
-    ), PrintableGeneric {
+        name,
+        server,
+        platform,
+        fromMC,
+        fromBot,
+        roomID,
+        isArcator,
+        "Switch",
+        nodeType,
+        nodeHost,
+        nodeName,
+        evtId,
+    ),
+    PrintableGeneric {
 
     override fun colour(): NamedTextColor = NamedTextColor.YELLOW
+
     override fun printString(): String {
         val vc = if (fromMC == true) "" else " [VC]"
         return "$name$vc moved from $fromServer to $server"

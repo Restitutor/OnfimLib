@@ -4,12 +4,13 @@ import java.net.InetSocketAddress
 import me.arcator.onfimLib.utils.SELF_PORT
 import me.arcator.onfimLib.utils.hostname
 
-typealias Host = Pair<String, Int>
+typealias Host = Pair<String, Port>
+
 typealias HostMap = HashMap<String, Array<Host>>
 
 internal data class SocketManager(
     private val unicastImpl: UnicastInterface,
-    private val log: (String) -> Unit
+    private val log: (String) -> Unit,
 ) {
     companion object {
         val allHosts = mutableSetOf<Host>()
@@ -18,8 +19,7 @@ internal data class SocketManager(
             arrayOf("jylina", "apollo", "icarus").forEach { h ->
                 for (p in 2500..2504) {
                     // Exclude hardcoded self
-                    if (h != hostname || p != SELF_PORT)
-                        allHosts.add(Pair(h, p))
+                    if (h != hostname || p != SELF_PORT) allHosts.add(Pair(h, p))
                 }
             }
         }

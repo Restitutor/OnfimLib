@@ -13,13 +13,11 @@ class ImageEvt(
     val name: String,
     val width: Int,
     val height: Int,
-
     nodeType: String = "BG",
     nodeHost: String = hostname,
     nodeName: String = nodeNameS,
     evtId: Int = randomEvtId(),
-) :
-    Generic(type = "Image", nodeType, nodeHost, nodeName, evtId) {
+) : Generic(type = "Image", nodeType, nodeHost, nodeName, evtId) {
 
     private fun getRGBArray() =
         GZIPInputStream(content.inputStream()).bufferedReader(UTF_8).readText()

@@ -1,12 +1,17 @@
 package me.arcator.onfimLib.out
 
-enum class Protocols { UDP, SCTP }
+enum class Protocols {
+    UDP,
+    SCTP,
+}
+
+typealias Port = Int
 
 data class HeartbeatStore(
-    private val udp: Int?,
-    private val sctp: Int?,
+    private val udp: Port?,
+    private val sctp: Port?,
     val nodeHost: String,
-    val nodeType: String
+    val nodeType: String,
 ) {
 
     private val lastPing: Int = nowSeconds()
@@ -16,10 +21,12 @@ data class HeartbeatStore(
     }
 
     fun isMatch(hs: HeartbeatStore) = nodeHost == hs.nodeHost && nodeType == hs.nodeType
+
     fun isOld() = lastPing < nowSeconds() - 120 // Two minutes
-    fun getPort(prop: Protocols): Int? {
+
+    fun getPort(prop: Protocols): Port? {
         if (prop == Protocols.UDP) return udp
         if (prop == Protocols.SCTP) return sctp
-        return 0
+        return null
     }
 }

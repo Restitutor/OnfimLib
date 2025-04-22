@@ -3,7 +3,6 @@ package me.arcator.onfimLib.utils
 import java.net.InetAddress
 import java.net.UnknownHostException
 
-
 internal val rawHostname: String =
     try {
         InetAddress.getLocalHost().hostName

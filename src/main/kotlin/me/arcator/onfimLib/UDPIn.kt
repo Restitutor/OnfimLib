@@ -4,16 +4,15 @@ import java.net.BindException
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetSocketAddress
-import me.arcator.onfimLib.interfaces.ChatSenderInterface
 import me.arcator.onfimLib.utils.SELF_PORT
-import me.arcator.onfimLib.utils.Unpacker
 
 @Suppress("unused")
-class uIn(private val chatSender: ChatSenderInterface) : Runnable {
+class UDPIn(private val read: (String, ByteArray) -> Unit) : Runnable {
     private var active = true
     private val length = 4096
 
     private val ds = DatagramSocket(null)
+
     override fun run() {
         while (active) {
             try {
@@ -30,14 +29,16 @@ class uIn(private val chatSender: ChatSenderInterface) : Runnable {
                 val buf = ByteArray(length)
                 val packet = DatagramPacket(buf, buf.size)
                 ds.receive(packet)
-                Unpacker.read("UDP", chatSender, packet.data)
+                read("UDP", packet.data)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
         ds.close()
-        println("Shutdown uIn")
+        println("Shutdown UDP In")
     }
+
+    fun port() = SELF_PORT
 
     fun disable() {
         active = false

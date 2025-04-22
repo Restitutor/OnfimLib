@@ -6,12 +6,10 @@ import java.net.BindException
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 import java.nio.channels.ClosedChannelException
-import me.arcator.onfimLib.interfaces.ChatSenderInterface
 import me.arcator.onfimLib.utils.SELF_PORT
-import me.arcator.onfimLib.utils.Unpacker
 
 @Suppress("unused")
-class sIn(private val chatSender: ChatSenderInterface) : Runnable {
+class SCTPIn(private val read: (String, ByteArray) -> Unit) : Runnable {
     private var active = true
     private val length = 30000
     private val assocHandler = object : AbstractNotificationHandler<java.io.PrintStream>() {}
@@ -36,8 +34,8 @@ class sIn(private val chatSender: ChatSenderInterface) : Runnable {
                 ds.receive(buf, System.out, assocHandler)
 
                 buf.rewind()
-                buf.get(arr)  // .array doesn't work for ds
-                Unpacker.read("SCTP", chatSender, arr)
+                buf.get(arr)
+                read("SCTP", arr)
             } catch (e: ClosedChannelException) {
                 closedCount += 1
             } catch (e: Exception) {
@@ -45,8 +43,10 @@ class sIn(private val chatSender: ChatSenderInterface) : Runnable {
             }
         }
         ds.close()
-        println("Shutdown sIn")
+        println("Shutdown sctp In")
     }
+
+    fun port() = SELF_PORT
 
     fun disable() {
         active = false

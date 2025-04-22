@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import me.arcator.onfimLib.utils.hostname
 
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 open class GenericChat(
     val name: String? = null,
@@ -14,17 +13,15 @@ open class GenericChat(
     val fromBot: Boolean? = false,
     val roomID: String? = "#arcatorirc",
     val isArcator: Boolean? = true,
-
     type: String,
     nodeType: String = "BG",
     nodeHost: String = hostname,
     nodeName: String = nodeNameS,
     evtId: Int = randomEvtId(),
+) : Generic(type, nodeType, nodeHost, nodeName, evtId) {
 
-    ) : Generic(type, nodeType, nodeHost, nodeName, evtId) {
+    @JsonIgnore open fun getHover() = if (platform == "In-Game") server else platform
 
-    @JsonIgnore
-    open fun getHover() = if (platform == "In-Game") server else platform
     fun shouldRelay() = nodeNameS != nodeName
 }
 

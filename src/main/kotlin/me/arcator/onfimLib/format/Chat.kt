@@ -43,8 +43,18 @@ class Chat(
     val person: String? = if (uuid == RES_ID) "RestitutorOrbis" else name,
 ) :
     GenericChat(
-        name, server, platform, fromMC, fromBot, roomID,
-        isArcator, "Chat", nodeType, nodeHost, nodeName, evtId,
+        name,
+        server,
+        platform,
+        fromMC,
+        fromBot,
+        roomID,
+        isArcator,
+        "Chat",
+        nodeType,
+        nodeHost,
+        nodeName,
+        evtId,
     ) {
 
     @Suppress("unused")
@@ -54,27 +64,27 @@ class Chat(
     @Suppress("unused")
     @JsonIgnore
     fun getChatMessage(): Component {
-        val hover = if (replyUser == null) {
-            Component.text(getHover()!!)
-        } else {
-            var comp = Component.text("${replyUser}\n")
-            if (replyColour != null) {
-                comp = comp.color(TextColor.fromCSSHexString(replyColour!!))
+        val hover =
+            if (replyUser == null) {
+                Component.text(getHover()!!)
+            } else {
+                var comp = Component.text("${replyUser}\n")
+                if (replyColour != null) {
+                    comp = comp.color(TextColor.fromCSSHexString(replyColour!!))
+                }
+
+                comp
+                    .append(Component.text(": ", NamedTextColor.WHITE))
+                    .append(MineDown.parse(replyText!!))
             }
 
-            comp.append(Component.text(": ", NamedTextColor.WHITE))
-                .append(MineDown.parse(replyText!!))
-        }
-
-        var prefix = Component.text(name!!, getColour())
-            .clickEvent(ClickEvent.openUrl("https://discord.gg/GwArgw2"))
-            .hoverEvent(HoverEvent.showText(hover))
+        var prefix =
+            Component.text(name!!, getColour())
+                .clickEvent(ClickEvent.openUrl("https://discord.gg/GwArgw2"))
+                .hoverEvent(HoverEvent.showText(hover))
 
         if (replyUser != null) {
-            prefix = prefix.append(
-                Component.text(" ⏎")
-                    .decoration(TextDecoration.BOLD, true),
-            )
+            prefix = prefix.append(Component.text(" ⏎").decoration(TextDecoration.BOLD, true))
         }
 
         return prefix
@@ -82,27 +92,26 @@ class Chat(
             .append(MineDown.parse(getMinecraftMessage()))
     }
 
-
     private fun inGame() =
-        (
-            (platform == "Discord" && roomID == "148831815984087041") ||
-                (platform in setOf("IRC", "Onfim") && roomID == "#arcatorirc") ||
-                (platform == "Matrix" && roomID == "!DNtAUptbNdsOOjGXVI:chat.arcator.co.uk") ||
-                platform == "In-Game")
+        ((platform == "Discord" && roomID == "148831815984087041") ||
+            (platform in setOf("IRC", "Onfim") && roomID == "#arcatorirc") ||
+            (platform == "Matrix" && roomID == "!DNtAUptbNdsOOjGXVI:chat.arcator.co.uk") ||
+            platform == "In-Game")
 
     fun shouldShow() = inGame()
 
     @Suppress("unused")
     @JsonIgnore
     private fun getColour(): TextColor {
-        if ((userColour is String) && userColour.startsWith("#")) return TextColor.fromCSSHexString(
-            userColour,
-        )!!
+        if ((userColour is String) && userColour.startsWith("#"))
+            return TextColor.fromCSSHexString(userColour)!!
         return when (platform) {
             "In-Game" -> NamedTextColor.GOLD
             "IRC" -> if (fromMC == true) NamedTextColor.RED else NamedTextColor.DARK_RED
             "Onfim" -> NamedTextColor.YELLOW
-            "Discord" -> if (fromBot == true) NamedTextColor.BLUE else TextColor.fromCSSHexString("#5865F2")!!
+            "Discord" ->
+                if (fromBot == true) NamedTextColor.BLUE
+                else TextColor.fromCSSHexString("#5865F2")!!
             "Matrix" -> NamedTextColor.LIGHT_PURPLE
             else -> {
                 println("[Onfim Listen] Did not expect platform: $platform")
@@ -128,15 +137,15 @@ class Chat(
                 // Ignore all other commands
                 if (!matchedCmd) return ""
             }
-            val msg = if (rawMsg.startsWith("/me ")) {
-                val suffix: String = rawMsg.split("/me ", ignoreCase = false, limit = 2).last()
-                "* $suffix"
-            } else if (rawMsg.startsWith("/eme ")) {
-                val suffix: String = rawMsg.split("/eme ", ignoreCase = false, limit = 2).last()
-                "* $suffix"
-            } else rawMsg
+            val msg =
+                if (rawMsg.startsWith("/me ")) {
+                    val suffix: String = rawMsg.split("/me ", ignoreCase = false, limit = 2).last()
+                    "* $suffix"
+                } else if (rawMsg.startsWith("/eme ")) {
+                    val suffix: String = rawMsg.split("/eme ", ignoreCase = false, limit = 2).last()
+                    "* $suffix"
+                } else rawMsg
             return EmojiParser.parseToUnicode(msg)
         }
     }
 }
-

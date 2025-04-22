@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import me.arcator.onfimLib.utils.hostname
 import me.arcator.onfimLib.utils.s_id
 
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 open class Generic(
     val type: String,
@@ -15,8 +14,7 @@ open class Generic(
 ) {
     companion object {
         // Cannot serialize static fields
-        @JvmStatic
-        val nodeNameS = "BG mcsa@$hostname"
+        @JvmStatic val nodeNameS = "BG mcsa@$hostname"
 
         init {
             println("[Onfim] Set nodeHost as $hostname")

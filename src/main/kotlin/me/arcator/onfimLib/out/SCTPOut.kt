@@ -1,13 +1,12 @@
 package me.arcator.onfimLib.out
 
-
 import com.sun.nio.sctp.MessageInfo
 import com.sun.nio.sctp.SctpMultiChannel
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 import java.nio.channels.UnresolvedAddressException
 
-internal class SCTPInterface : UnicastInterface {
+internal class SCTPOut : UnicastInterface {
     private val socket = SctpMultiChannel.open()
 
     init {
@@ -21,10 +20,7 @@ internal class SCTPInterface : UnicastInterface {
     override fun send(message: ByteArray, host: InetSocketAddress) {
         synchronized(socket) {
             try {
-                socket.send(
-                    ByteBuffer.wrap(message),
-                    MessageInfo.createOutgoing(host, 0),
-                )
+                socket.send(ByteBuffer.wrap(message), MessageInfo.createOutgoing(host, 0))
             } catch (e: UnresolvedAddressException) {
                 System.err.println("Could not find ${host.hostString}")
                 e.printStackTrace()
@@ -32,4 +28,3 @@ internal class SCTPInterface : UnicastInterface {
         }
     }
 }
-
