@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.vdurmont.emoji.EmojiParser
 import de.themoep.minedown.adventure.MineDown
 import java.util.*
-import me.arcator.onfimLib.utils.hostname
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.event.HoverEvent
@@ -14,48 +13,25 @@ import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.format.TextDecoration
 
 val RES_ID: UUID = UUID.fromString("864cff60-0b54-4757-a1f3-f7d4828b7d29")
+val RELAY_CMDS = hashSetOf("me", "eme", "broadcast", "bc", "say", "alert")
+// Main and testing channel
+val DISCORD_CHANNELS = hashSetOf("148831815984087041", "1364820197801988099")
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 class Chat(
     val plaintext: String,
+    val user: ChatUser,
+    val server: EventLocation,
     val rawtext: String = plaintext,
-    val replyColour: String? = null,
-    val replyUser: String? = null,
-    val replyText: String? = null,
-    val userColour: String? = null,
-    uuid: UUID? = null,
-
-    // Pass to Generic
-    name: String,
-    server: String,
-    platform: String = "In-Game",
-    fromMC: Boolean = true,
-    fromBot: Boolean = false,
-    roomID: String = "#arcatorirc",
-    isArcator: Boolean = true,
-    nodeType: String = "BG",
-    nodeHost: String = hostname,
-    nodeName: String = nodeNameS,
-    evtId: Int = randomEvtId(),
-
-    // Computed values
+    val platform: String = "In-Game",
+    val context: DiscordContext? = null,
     val mentioned: Boolean = plaintext.lowercase().split(" ").any { it.endsWith("fim") },
-    val person: String? = if (uuid == RES_ID) "RestitutorOrbis" else name,
-) :
-    GenericChat(
-        name,
-        server,
-        platform,
-        fromMC,
-        fromBot,
-        roomID,
-        isArcator,
-        "Chat",
-        nodeType,
-        nodeHost,
-        nodeName,
-        evtId,
-    ) {
+    val language: String? = null,
+    val dm: Boolean = false,
+    val mc: Boolean = true,
+    val perms: Int = 0,
+    val room: ChatRoom = ChatRoom(),
+) : SerializedEvent(type = "Chat") {
 
     @Suppress("unused")
     @JsonIgnore
@@ -65,25 +41,25 @@ class Chat(
     @JsonIgnore
     fun getChatMessage(): Component {
         val hover =
-            if (replyUser == null) {
-                Component.text(getHover()!!)
+            if (context?.replyUser == null) {
+                Component.text(getHover())
             } else {
-                var comp = Component.text("${replyUser}\n")
-                if (replyColour != null) {
-                    comp = comp.color(TextColor.fromCSSHexString(replyColour!!))
+                var comp = Component.text("${context.replyUser}\n")
+                if (context.replyColour != null) {
+                    comp = comp.color(TextColor.fromCSSHexString(context.replyColour))
                 }
 
                 comp
                     .append(Component.text(": ", NamedTextColor.WHITE))
-                    .append(MineDown.parse(replyText!!))
+                    .append(MineDown.parse(context.replyText))
             }
 
         var prefix =
-            Component.text(name!!, getColour())
+            Component.text(user.name, getColour())
                 .clickEvent(ClickEvent.openUrl("https://discord.gg/GwArgw2"))
                 .hoverEvent(HoverEvent.showText(hover))
 
-        if (replyUser != null) {
+        if (context?.replyUser != null) {
             prefix = prefix.append(Component.text(" ⏎").decoration(TextDecoration.BOLD, true))
         }
 
@@ -93,9 +69,9 @@ class Chat(
     }
 
     private fun inGame() =
-        ((platform == "Discord" && roomID == "148831815984087041") ||
-            (platform in setOf("IRC", "Onfim") && roomID == "#arcatorirc") ||
-            (platform == "Matrix" && roomID == "!DNtAUptbNdsOOjGXVI:chat.arcator.co.uk") ||
+        ((platform == "Discord" && room.id in DISCORD_CHANNELS) ||
+            (platform in setOf("IRC", "Onfim") && room.id == "#arcatorirc") ||
+            (platform == "Matrix" && room.id == "!DNtAUptbNdsOOjGXVI:chat.arcator.co.uk") ||
             platform == "In-Game")
 
     fun shouldShow() = inGame()
@@ -103,15 +79,16 @@ class Chat(
     @Suppress("unused")
     @JsonIgnore
     private fun getColour(): TextColor {
+        val userColour = user.colour
         if ((userColour is String) && userColour.startsWith("#"))
             return TextColor.fromCSSHexString(userColour)!!
+
         return when (platform) {
             "In-Game" -> NamedTextColor.GOLD
-            "IRC" -> if (fromMC == true) NamedTextColor.RED else NamedTextColor.DARK_RED
+            "IRC" -> if (mc) NamedTextColor.RED else NamedTextColor.DARK_RED
             "Onfim" -> NamedTextColor.YELLOW
             "Discord" ->
-                if (fromBot == true) NamedTextColor.BLUE
-                else TextColor.fromCSSHexString("#5865F2")!!
+                if (user.bot) NamedTextColor.BLUE else TextColor.fromCSSHexString("#5865F2")!!
             "Matrix" -> NamedTextColor.LIGHT_PURPLE
             else -> {
                 println("[Onfim Listen] Did not expect platform: $platform")
@@ -125,8 +102,8 @@ class Chat(
         fun fromMessage(rawMsg: String): String {
             if (rawMsg.startsWith("/")) {
                 var matchedCmd = false
-                val cmds = listOf("me", "eme", "broadcast", "bc", "say", "alert")
-                for (cmd in cmds) {
+
+                for (cmd in RELAY_CMDS) {
                     val fullCmd = "/$cmd "
                     if (rawMsg.startsWith(fullCmd)) {
                         matchedCmd = true
@@ -148,4 +125,6 @@ class Chat(
             return EmojiParser.parseToUnicode(msg)
         }
     }
+
+    @JsonIgnore fun getHover() = if (platform == "In-Game") server.name else platform
 }

@@ -1,0 +1,30 @@
+package me.arcator.onfimLib.format
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import java.util.*
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+class ChatServer(val name: String, val arcator: Boolean = true)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+class ChatRoom(val id: String = "#arcatorirc", val name: String? = null)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+class ChatUser(
+    val name: String,
+    val bot: Boolean = false,
+    uuid: UUID? = null, // null for incoming events
+    val id: String? = uuid.toString(),
+    val colour: String? = null,
+    val auth: String? =
+        if (uuid == RES_ID) {
+            "RestitutorOrbis"
+        } else null,
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+class DiscordContext(
+    val replyColour: String? = null,
+    val replyUser: String? = null,
+    val replyText: String? = null,
+)

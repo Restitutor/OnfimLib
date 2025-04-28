@@ -17,7 +17,7 @@ internal data class SocketManager(
 
         init {
             arrayOf("jylina", "apollo", "icarus").forEach { h ->
-                for (p in 2500..2504) {
+                for (p in 2400..2403) {
                     // Exclude hardcoded self
                     if (h != hostname || p != SELF_PORT) allHosts.add(Pair(h, p))
                 }

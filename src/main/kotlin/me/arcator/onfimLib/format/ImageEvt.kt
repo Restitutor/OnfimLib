@@ -3,21 +3,12 @@ package me.arcator.onfimLib.format
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import java.nio.charset.StandardCharsets.UTF_8
 import java.util.zip.GZIPInputStream
-import me.arcator.onfimLib.utils.hostname
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextColor
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-class ImageEvt(
-    private val content: ByteArray,
-    val name: String,
-    val width: Int,
-    val height: Int,
-    nodeType: String = "BG",
-    nodeHost: String = hostname,
-    nodeName: String = nodeNameS,
-    evtId: Int = randomEvtId(),
-) : Generic(type = "Image", nodeType, nodeHost, nodeName, evtId) {
+class ImageEvt(private val content: ByteArray, val name: String, val width: Int, val height: Int) :
+    SerializedEvent(type = "Image") {
 
     private fun getRGBArray() =
         GZIPInputStream(content.inputStream()).bufferedReader(UTF_8).readText()
