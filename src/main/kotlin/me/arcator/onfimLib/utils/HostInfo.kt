@@ -37,3 +37,4 @@ internal val s_id: Int =
 
 internal const val SELF_PORT = 2403
 val nodeNameS = "BG mcsa@$hostname"
+val bind_ip = "10.0.0.$s_id"

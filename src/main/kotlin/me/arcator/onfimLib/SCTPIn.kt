@@ -7,6 +7,7 @@ import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 import java.nio.channels.ClosedChannelException
 import me.arcator.onfimLib.utils.SELF_PORT
+import me.arcator.onfimLib.utils.bind_ip
 
 @Suppress("unused")
 class SCTPIn(private val read: (String, ByteArray) -> Unit) : Runnable {
@@ -18,7 +19,7 @@ class SCTPIn(private val read: (String, ByteArray) -> Unit) : Runnable {
     override fun run() {
         while (active) {
             try {
-                ds.bind(InetSocketAddress(SELF_PORT))
+                ds.bind(InetSocketAddress(bind_ip,SELF_PORT))
             } catch (e: BindException) {
                 Thread.sleep(30000)
                 continue

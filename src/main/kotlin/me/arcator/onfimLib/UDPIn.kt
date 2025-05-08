@@ -5,6 +5,7 @@ import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetSocketAddress
 import me.arcator.onfimLib.utils.SELF_PORT
+import me.arcator.onfimLib.utils.bind_ip
 
 @Suppress("unused")
 class UDPIn(private val read: (String, ByteArray) -> Unit) : Runnable {
@@ -16,7 +17,7 @@ class UDPIn(private val read: (String, ByteArray) -> Unit) : Runnable {
     override fun run() {
         while (active) {
             try {
-                ds.bind(InetSocketAddress(SELF_PORT))
+                ds.bind(InetSocketAddress(bind_ip, SELF_PORT))
             } catch (e: BindException) {
                 Thread.sleep(30000)
                 continue

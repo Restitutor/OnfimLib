@@ -35,23 +35,19 @@ class Chat(
 
     @Suppress("unused")
     @JsonIgnore
-    fun getMinecraftMessage(): String = "&f" + EmojiParser.parseToAliases(plaintext)
-
-    @Suppress("unused")
-    @JsonIgnore
     fun getChatMessage(): Component {
         val hover =
             if (context?.replyUser == null) {
                 Component.text(getHover())
             } else {
-                var comp = Component.text("${context.replyUser}\n")
-                if (context.replyColour != null) {
-                    comp = comp.color(TextColor.fromCSSHexString(context.replyColour))
-                }
+                val comp = Component.text(context.replyUser)
+                    .append(Component.text(":\n", NamedTextColor.WHITE))
 
-                comp
-                    .append(Component.text(": ", NamedTextColor.WHITE))
-                    .append(MineDown.parse(context.replyText))
+                var suffix = MineDown.parse(context.replyText)
+                if (context.replyColour != null) {
+                    suffix = suffix.color(TextColor.fromCSSHexString(context.replyColour))
+                }
+                comp.append(suffix)
             }
 
         var prefix =
@@ -65,13 +61,13 @@ class Chat(
 
         return prefix
             .append(Component.text(": ", NamedTextColor.WHITE))
-            .append(MineDown.parse(getMinecraftMessage()))
+            .append(MineDown.parse("&f$plaintext"))
     }
 
     private fun inGame() =
         ((platform == "Discord" && room.id in DISCORD_CHANNELS) ||
             (platform in setOf("IRC", "Onfim") && room.id == "#arcatorirc") ||
-            (platform == "Matrix" && room.id == "!DNtAUptbNdsOOjGXVI:chat.arcator.co.uk") ||
+            (platform == "Matrix" && room.id == "!apBHVkselqAvubAreT:chat.arcator.co.uk") ||
             platform == "In-Game")
 
     fun shouldShow() = inGame()

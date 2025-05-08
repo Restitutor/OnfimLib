@@ -28,7 +28,6 @@ class Unpacker(private val chatSender: ChatSenderInterface,
     fun read(protocol: String, serialized: ByteArray) {
         val meta = objectMapper.readValue(serialized, SerializedEvent::class.java)
         val evtType = meta.type
-        logger("Received $protocol $evtType event.")
 
         synchronized(this) {
             if (meta.id in seenUuids) return
