@@ -23,5 +23,6 @@ open class SerializedEvent(
         }
     }
 
-    @JsonIgnore fun shouldRelay() = nodeNameS != node.name
+    @JsonIgnore
+    fun shouldRelay() = nodeNameS != node.name
 }

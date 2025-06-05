@@ -14,12 +14,12 @@ class SCTPIn(private val read: (String, ByteArray) -> Unit) : Runnable {
     private var active = true
     private val length = 30000
     private val assocHandler = object : AbstractNotificationHandler<java.io.PrintStream>() {}
-    private val ds = SctpMultiChannel.open()
+    val ds = SctpMultiChannel.open()
 
     override fun run() {
         while (active) {
             try {
-                ds.bind(InetSocketAddress(bind_ip,SELF_PORT))
+                ds.bind(InetSocketAddress(bind_ip, SELF_PORT))
             } catch (e: BindException) {
                 Thread.sleep(30000)
                 continue
@@ -31,11 +31,12 @@ class SCTPIn(private val read: (String, ByteArray) -> Unit) : Runnable {
         while (active && closedCount < 10) {
             try {
                 val buf = ByteBuffer.allocateDirect(length)
-                val arr = ByteArray(length)
                 ds.receive(buf, System.out, assocHandler)
 
+                val actualLength = buf.position()
                 buf.rewind()
-                buf.get(arr)
+                val arr = ByteArray(actualLength)
+                buf.get(arr, 0, actualLength)
                 read("SCTP", arr)
             } catch (e: ClosedChannelException) {
                 closedCount += 1

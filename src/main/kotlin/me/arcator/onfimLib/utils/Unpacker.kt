@@ -11,16 +11,22 @@ import me.arcator.onfimLib.format.SerializedEvent
 import me.arcator.onfimLib.format.Switch
 import me.arcator.onfimLib.interfaces.ChatSenderInterface
 import org.msgpack.jackson.dataformat.MessagePackFactory
+import java.net.DatagramPacket
+import java.net.DatagramSocket
+import java.net.InetAddress
 
-class Unpacker(private val chatSender: ChatSenderInterface,
-               private val logger: ((String) -> Unit),
+class Unpacker(
+    private val chatSender: ChatSenderInterface,
+    private val logger: ((String) -> Unit),
 ) {
     private val objectMapper = ObjectMapper(MessagePackFactory()).registerKotlinModule()
     private val seenUuids = ArrayDeque<Int>()
     private var onHeartbeat: ((Heartbeat) -> Unit)? = null
+    private lateinit var ds: DatagramSocket
 
     @Suppress("unused")
-    fun setOnHeartbeat(listener: ((Heartbeat) -> Unit)) {
+    fun initialize(socket: DatagramSocket, listener: ((Heartbeat) -> Unit)) {
+        ds = socket
         onHeartbeat = listener
     }
 
@@ -48,6 +54,24 @@ class Unpacker(private val chatSender: ChatSenderInterface,
 
             seenUuids.addLast(meta.id)
             while (seenUuids.size > 50) seenUuids.removeFirst()
+            sendUdpMessage(serialized)
+        }
+    }
+
+    fun sendUdpMessage(serialized: ByteArray) {
+        // Relay it to the web console backend for visualizing
+        val host = "10.0.0.7"
+        val ipAddress = InetAddress.getByName(host)
+        try {
+            // Bind socket
+            synchronized(this) { ->
+                // Destination address and port
+                val packet = DatagramPacket(serialized, serialized.size, ipAddress, 2525)
+                ds.send(packet)
+                // logger("Message sent to $host:2525 ${serialized.size}")
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 }

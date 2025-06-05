@@ -14,6 +14,7 @@ import net.kyori.adventure.text.format.TextDecoration
 
 val RES_ID: UUID = UUID.fromString("864cff60-0b54-4757-a1f3-f7d4828b7d29")
 val RELAY_CMDS = hashSetOf("me", "eme", "broadcast", "bc", "say", "alert")
+
 // Main and testing channel
 val DISCORD_CHANNELS = hashSetOf("148831815984087041", "1364820197801988099")
 
@@ -28,7 +29,6 @@ class Chat(
     val mentioned: Boolean = plaintext.lowercase().split(" ").any { it.endsWith("fim") },
     val language: String? = null,
     val dm: Boolean = false,
-    val mc: Boolean = true,
     val perms: Int = 0,
     val room: ChatRoom = ChatRoom(),
 ) : SerializedEvent(type = "Chat") {
@@ -66,7 +66,7 @@ class Chat(
 
     private fun inGame() =
         ((platform == "Discord" && room.id in DISCORD_CHANNELS) ||
-            (platform in setOf("IRC", "Onfim") && room.id == "#arcatorirc") ||
+            (platform == "Onfim" && room.id == "#arcator") ||
             (platform == "Matrix" && room.id == "!apBHVkselqAvubAreT:chat.arcator.co.uk") ||
             platform == "In-Game")
 
@@ -81,10 +81,10 @@ class Chat(
 
         return when (platform) {
             "In-Game" -> NamedTextColor.GOLD
-            "IRC" -> if (mc) NamedTextColor.RED else NamedTextColor.DARK_RED
             "Onfim" -> NamedTextColor.YELLOW
             "Discord" ->
                 if (user.bot) NamedTextColor.BLUE else TextColor.fromCSSHexString("#5865F2")!!
+
             "Matrix" -> NamedTextColor.LIGHT_PURPLE
             else -> {
                 println("[Onfim Listen] Did not expect platform: $platform")
@@ -122,5 +122,6 @@ class Chat(
         }
     }
 
-    @JsonIgnore fun getHover() = if (platform == "In-Game") server.name else platform
+    @JsonIgnore
+    fun getHover() = if (platform == "In-Game") server.name else platform
 }

@@ -2,6 +2,8 @@ package me.arcator.onfimLib.out
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import com.sun.nio.sctp.SctpMultiChannel
+import java.net.DatagramSocket
 import me.arcator.onfimLib.format.Heartbeat
 import me.arcator.onfimLib.format.SerializedEvent
 import org.msgpack.jackson.dataformat.MessagePackFactory
@@ -10,11 +12,13 @@ class Dispatcher(
     private val logger: ((String) -> Unit),
     private val getUdpInPort: () -> Port,
     private val getSctpInPort: () -> Port,
+    sctpSocket: SctpMultiChannel,
+    udpSocket: DatagramSocket
 ) {
     private val objectMapper = ObjectMapper(MessagePackFactory()).registerKotlinModule()
 
-    private val uOut = SocketManager(UDPOut(), logger)
-    private val sOut = SocketManager(SCTPOut(), logger)
+    private val uOut = SocketManager(UDPOut(udpSocket), logger)
+    private val sOut = SocketManager(SCTPOut(sctpSocket), logger)
     private val hm = HeartbeatManager(uOut::setMulticastHosts, sOut::setMulticastHosts)
 
     fun broadcast(evt: SerializedEvent) {
@@ -37,10 +41,5 @@ class Dispatcher(
         if (h.udp != null || h.sctp != null) {
             uOut.broadcast(objectMapper.writeValueAsBytes(h))
         }
-    }
-
-    fun disable() {
-        uOut.disable()
-        sOut.disable()
     }
 }

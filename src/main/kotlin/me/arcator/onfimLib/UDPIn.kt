@@ -12,7 +12,7 @@ class UDPIn(private val read: (String, ByteArray) -> Unit) : Runnable {
     private var active = true
     private val length = 4096
 
-    private val ds = DatagramSocket(null)
+    val ds = DatagramSocket(null)
 
     override fun run() {
         while (active) {
@@ -30,7 +30,8 @@ class UDPIn(private val read: (String, ByteArray) -> Unit) : Runnable {
                 val buf = ByteArray(length)
                 val packet = DatagramPacket(buf, buf.size)
                 ds.receive(packet)
-                read("UDP", packet.data)
+                val received = packet.data.copyOf(packet.length)
+                read("UDP", received)
             } catch (e: Exception) {
                 e.printStackTrace()
             }

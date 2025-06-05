@@ -6,17 +6,8 @@ import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 import java.nio.channels.UnresolvedAddressException
 
-internal class SCTPOut : UnicastInterface {
-    private val socket = SctpMultiChannel.open()
-
-    init {
-        socket.configureBlocking(false)
-    }
-
+internal class SCTPOut(private val socket: SctpMultiChannel) : UnicastInterface {
     override val type = "SCTP"
-
-    override fun disable() = socket.close()
-
     override fun send(message: ByteArray, host: InetSocketAddress) {
         synchronized(socket) {
             try {

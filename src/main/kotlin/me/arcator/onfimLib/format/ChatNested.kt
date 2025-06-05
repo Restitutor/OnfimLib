@@ -7,7 +7,7 @@ import java.util.*
 class ChatServer(val name: String, val arcator: Boolean = true)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-class ChatRoom(val id: String = "#arcatorirc", val name: String? = null)
+class ChatRoom(val id: String = "#arcator", val name: String? = null)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 class ChatUser(

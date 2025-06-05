@@ -5,7 +5,7 @@ import net.kyori.adventure.text.format.NamedTextColor
 class JoinQuit(
     val username: String,
     type: String,
-    val mc: Boolean = true,
+    val game: Boolean = true,
     val platform: String = "In-Game",
     val server: EventLocation,
 ) : SerializedEvent(type = type), PlayerMoveInterface {
@@ -14,7 +14,7 @@ class JoinQuit(
         if (type == "Join") NamedTextColor.GREEN else NamedTextColor.RED
 
     override fun printString(): String {
-        val vc = if (mc) "" else " [VC]"
+        val vc = if (game) "" else " [VC]"
         val verb = if (type == "Join") " joined " else " left "
         return username + vc + verb + server.name
     }
@@ -26,7 +26,7 @@ fun makeJoinQuit(username: String, serverName: String, type: String) =
 class Switch(
     val username: String,
     val fromServer: String,
-    val mc: Boolean = true,
+    val game: Boolean = true,
     val platform: String = "In-Game",
     val server: EventLocation,
 ) : SerializedEvent(type = "Switch"), PlayerMoveInterface {
@@ -34,7 +34,7 @@ class Switch(
     override fun colour(): NamedTextColor = NamedTextColor.YELLOW
 
     override fun printString(): String {
-        val vc = if (mc) "" else " [VC]"
+        val vc = if (game) "" else " [VC]"
         return "${username}$vc moved from $fromServer to ${server.name}"
     }
 }

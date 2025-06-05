@@ -16,7 +16,7 @@ internal data class SocketManager(
         val allHosts = mutableSetOf<Host>()
 
         init {
-            arrayOf("jylina", "apollo", "icarus").forEach { h ->
+            arrayOf("jylina", "apollo", "icarus", "styx").forEach { h ->
                 for (p in 2400..2403) {
                     // Exclude hardcoded self
                     if (h != hostname || p != SELF_PORT) allHosts.add(Pair(h, p))
@@ -40,8 +40,6 @@ internal data class SocketManager(
             e.printStackTrace()
         }
     }
-
-    fun disable() = unicastImpl.disable()
 
     fun multicast(packed: ByteArray, nodeType: String? = null) {
         getMulticastHosts(nodeType).forEach { h -> unicast(packed, h) }

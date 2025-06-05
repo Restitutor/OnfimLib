@@ -6,7 +6,12 @@ import me.arcator.onfimLib.utils.hostname
 
 class ServerMessage(
     val text: String,
-    val server: String = "Velocity${hostname.replaceFirstChar { if (it.isLowerCase()) it.titlecase(
-        getDefault()
-    ) else it.toString() }}") :
+    val server: String = "Velocity${
+        hostname.replaceFirstChar {
+            if (it.isLowerCase()) it.titlecase(
+                getDefault(),
+            ) else it.toString()
+        }
+    }"
+) :
     SerializedEvent(type = "Server Message")

@@ -7,9 +7,12 @@ import net.kyori.adventure.text.format.NamedTextColor
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 sealed interface PlayerMoveInterface {
-    @JsonIgnore fun colour(): NamedTextColor
+    @JsonIgnore
+    fun colour(): NamedTextColor
 
-    @JsonIgnore fun printString(): String
+    @JsonIgnore
+    fun printString(): String
 
-    @JsonIgnore fun getComponent() = Component.text(printString(), colour())
+    @JsonIgnore
+    fun getComponent() = Component.text(printString(), colour())
 }
